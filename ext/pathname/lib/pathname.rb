@@ -535,6 +535,28 @@ class Pathname
       Pathname.new(File.join(*relpath_names))
     end
   end
+
+  #
+  # Returns or yields Pathname objects that match the given glob
+  # pattern or glob patterns, relative to +self+.
+  #
+  # It joins +self+ with the given glob pattern. +self+ should be a
+  # directory. When +pattern+ is an absolute path, +self+ does not
+  # matter.
+  #
+  #  Pathname('config').glob("*.rb")
+  #	#=> [#<Pathname:config/environment.rb>, #<Pathname:config/routes.rb>, ..]
+  #
+  # Pathname('config').glob(["*.rb", "*.txt"])
+  #	#=> [#<Pathname:config/environment.rb>, #<Pathname:config/routes.rb>, ..]
+  #
+  # See Dir.glob.
+  #
+  def glob(pattern, flags = 0, &b)
+    Array(pattern).flat_map do |pat|
+      self.class.glob(join(pat), flags, &b)
+    end
+  end
 end
 
 

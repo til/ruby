@@ -1222,6 +1222,25 @@ class TestPathname < Test::Unit::TestCase
     }
   end
 
+  def test_glob
+    with_tmpchdir('rubytest-pathname') {|dir|
+      open("f", "w") {|f| f.write "abc" }
+      Dir.mkdir("d")
+      assert_equal([Pathname("d"), Pathname("f")], Pathname('').glob("*").sort)
+      a = []
+      Pathname('').glob("*") {|path| a << path }
+      a.sort!
+      assert_equal([Pathname("d"), Pathname("f")], a)
+      open("FOO.txt", "w") {|f| f.write "abc" }
+      assert_equal([Pathname("FOO.txt")], Pathname('').glob("foo.*", File::FNM_CASEFOLD))
+    }
+    with_tmpchdir('rubytest-pathname') {|dir|
+      open("a.rb", "w") {|f| f.write "abc" }
+      open("a.txt", "w") {|f| f.write "abc" }
+      assert_equal([Pathname("a.rb"), Pathname("a.txt")], Pathname('').glob(["*.rb", "*.txt"]))
+    }
+  end
+
   def test_s_getwd
     wd = Pathname.getwd
     assert_kind_of(Pathname, wd)
